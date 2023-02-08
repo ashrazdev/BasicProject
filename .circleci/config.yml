@@ -1,80 +1,23 @@
-# Based on https://github.com/CircleCI-Public/circleci-demo-react-native
 version: 2.1
 jobs:
-  node:
-    working_directory: ~/app
+  build:
+    working_directory: ~/repo
     docker:
-      - image: cimg/node:14.15
+      - image: circleci/node:10.16.3
     steps:
       - checkout
-      - restore_cache:
-          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
-      - restore_cache:
-          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
-     
-      - save_cache:
-          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
-          paths:
-            - ~/.cache/yarn
-      - save_cache:
-          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
-          paths:
-            - node_modules
-
-      - persist_to_workspace:
-          root: ~/app
-          paths:
-            - node_modules
-
-  ios-build:
-    working_directory: ~/app/ios
-    macos:
-      xcode: 13.4.1
-
-    steps:
-      - checkout:
-          path: ~/app
-      - attach_workspace:
-          at: ~/app
-      - restore_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
       - run:
-          command: pod install
-          working_directory: ios
+          name: Update NPM
+          command: 'sudo npm install -g npm@5'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
-          command: xcodebuild clean archive -workspace testCiCdReactNative.xcworkspace -scheme testCiCdReactNative -archivePath testCiCdReactNative.xcarchive CODE_SIGNING_ALLOWED=NO | xcpretty
-          working_directory: ios
+          name: Install Dependencies
+          command: npm install
       - save_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+          key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
-            - ios/Pods
-
-  android-build:
-    working_directory: ~/app/android
-    docker:
-      - image: circleci/android:api-29-node
-    steps:
-      - checkout:
-          path: ~/app
-      - attach_workspace:
-          at: ~/app
+            - ./node_modules
       - run:
-          name: Bundle *.aap & *.apk
-          command: ./gradlew bundleRelease assembleRelease
-      - store_artifacts:
-          path: app/build/outputs/bundle/release
-          destination: release-aab/
-      - store_artifacts:
-          path: app/build/outputs/apk/release
-          destination: release-apk/
-
-workflows:
-  node-android:
-    jobs:
-      - node
-      - android-build:
-          requires:
-            - node
-      - ios-build:
-          requires:
-            - node
+          name: Run tests
+          command: npm run test

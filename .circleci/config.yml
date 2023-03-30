@@ -29,7 +29,7 @@ jobs:
   ios-build:
     working_directory: ~/app/ios
     macos:
-      xcode: 14.2
+      xcode: 13.4.1
 
     steps:
       - checkout:
@@ -42,7 +42,7 @@ jobs:
           command: pod install
           working_directory: ios
       - run:
-          command: xcodebuild clean archive -workspace testCiCdReactNative.xcworkspace -scheme testCiCdReactNative -archivePath testCiCdReactNative.xcarchive CODE_SIGNING_ALLOWED=NO | xcpretty
+          command: xcodebuild clean archive -workspace BasicProject.xcworkspace -scheme BasicProject -archivePath BasicProject.xcarchive CODE_SIGNING_ALLOWED=NO | xcpretty
           working_directory: ios
       - save_cache:
           key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}

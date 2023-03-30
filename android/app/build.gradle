@@ -1,5 +1,13 @@
-apply plugin: "com.android.application"
-apply plugin: "com.facebook.react"
+plugins {
+  id 'com.android.application'
+
+  // Add the Google services Gradle plugin
+  id 'com.google.gms.google-services'
+
+ id 'com.facebook.react'
+}
+
+
 
 import com.android.build.OutputFile
 
@@ -149,10 +157,13 @@ android {
 }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:31.2.0')
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
@@ -168,3 +179,12 @@ dependencies {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+
+task wrapper(type: Wrapper){
+    gradleVersion = '7.5.1'
+}
+
+task prepareKotlinBuildScriptModel {
+
+}
